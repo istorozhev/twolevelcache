@@ -2,6 +2,8 @@
 package org.twolevelcache;
 
 /* старт: 07.12.2017 15:20 .. 17:30 сделан каркас, основные файлы, примерно продуман алгоритм
+   продолжение: 08.12.2017 14:00
+
 *
 * задание: создать двухуровневый кэш для объектов с возможностью настройки стратегии хранениея/вытеснения и размеров кэша
 * 1 1ровень - в памяти
@@ -19,6 +21,8 @@ package org.twolevelcache;
 * */
 
 
+import java.io.IOException;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class Main {
@@ -27,6 +31,7 @@ public class Main {
 
 
     public static void main(String []  args){
+
         System.out.println("started");
 
         //тестирование: из хранилища в случайном порядке заправшиваются объекты по коду от 1 до 1000.
@@ -42,8 +47,8 @@ public class Main {
 
 
         ObjectProvider objectProvider = new ObjectProvider();
-        for (Integer i=0; i< 10; i++) {
-            Integer objectID = (int)(1000*Math.random());
+        for (long i=0; i< 10; i++) {
+            Long objectID = (long)(1000*Math.random());
             MyObject object = objectProvider.getObject(objectID);
         }
 

@@ -3,7 +3,7 @@ package org.twolevelcache;
 public class ObjectProvider {
 
     DualCache cache = new DualCache();
-    MyObject getObject(Integer ObjectID){
+    MyObject getObject(Long ObjectID){
         MyObject object = cache.getObject(ObjectID);
         if (object == null){
 

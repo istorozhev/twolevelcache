@@ -7,9 +7,9 @@ public class MyObject {
 
 
     @Getter
-    private Integer ID;
+    private Long ID;
 
-    public MyObject(Integer ObjectID){
+    public MyObject(Long ObjectID){
         ID = ObjectID;
     }
 
