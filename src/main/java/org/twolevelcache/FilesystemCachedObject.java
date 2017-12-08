@@ -6,33 +6,28 @@ import lombok.Getter;
 import java.io.*;
 import java.util.Calendar;
 
-public class FilesystemCachedObject {
+public class FilesystemCachedObject extends CachedObject implements Serializable{
+
+    private String storePath  = "c:/temp/fileCache/";
+    public FilesystemCachedObject(CachedObjectInterface cachedObject) throws Exception {
+
+        super(cachedObject);
+    }
 
     public FilesystemCachedObject(MyObject myObject) throws Exception{
 
-        if (myObject == null)
-            throw new Exception("save NULL object into FS");
-        if (myObject.getID() == null)
-            throw new Exception("save NULL object ID into FS");
-
-
-        MyObject object = myObject;
-        ObjectID=object.getID();
-
-        useCounter = Long.valueOf(0);
-        cacheTimestamp = Calendar.getInstance().getTimeInMillis();
-
+        super(myObject);
 
 
         //запись объекта в ФС
         try {
 
-            File filesystemCacheDirectory = new File(String.valueOf("fileCache/"));
+            File filesystemCacheDirectory = new File(String.valueOf(storePath));
             if(!filesystemCacheDirectory.exists()){
                 filesystemCacheDirectory.mkdir();
             }
 
-            FileOutputStream fout = new FileOutputStream("fileCache/"+object.getID().toString());
+            FileOutputStream fout = new FileOutputStream(storePath+object.getID().toString());
             ObjectOutputStream oos = new ObjectOutputStream(fout);
             oos.writeObject(object);
             oos.close();
@@ -41,21 +36,20 @@ public class FilesystemCachedObject {
         catch (IOException e) {
             Main.LOGGER.severe("Ошибка при сохранении объекта в файловой системе. "+e.getMessage());
         }
-
-
     }
 
-    public Long getObjectID(){
-        return  ObjectID;
-    }
+
+
+
     public MyObject getObject(){
 
+        //осознанно не делаю сохранения объекта после загрузки с ФС - всегда читаю из ФС
         MyObject object = null;
         try {
-            File filesystemCacheObjectFile = new File(String.valueOf("fileCache/" + ObjectID.toString()));
+            File filesystemCacheObjectFile = new File(String.valueOf(storePath + objectID.toString()));
             if (filesystemCacheObjectFile.exists()) {
 
-                FileInputStream fis = new FileInputStream("fileCache/" + ObjectID.toString());
+                FileInputStream fis = new FileInputStream(storePath + objectID.toString());
                 ObjectInputStream ois = new ObjectInputStream(fis);
                 object = (MyObject) ois.readObject();
                 ois.close();
@@ -73,12 +67,4 @@ public class FilesystemCachedObject {
         return  object;
     }
 
-
-    private Long ObjectID=null;
-
-    @Getter
-    private Long useCounter;
-
-    @Getter
-    private Long cacheTimestamp;
 }

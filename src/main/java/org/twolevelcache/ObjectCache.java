@@ -1,40 +1,52 @@
 package org.twolevelcache;
 
-import java.util.*;
+import lombok.Getter;
 
-public class MemoryCache {
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.TreeMap;
+
+public class ObjectCache implements ObjectCacheInterface{
+    @Getter
+    protected String cacheName="";
 
 
-
-
-    private int memoryCacheMaxSize = 3;
+    protected int cacheMaxSize = 3;
     //использую HashMap в качестве хранилища
-    private HashMap<Long, MemoryCachedObject> memoryCacheObjects = new HashMap<Long, MemoryCachedObject>();
+    protected HashMap<Long, CachedObjectInterface> cacheObjects = new HashMap<Long, CachedObjectInterface>();
 
-    private TreeMap<Long, MemoryCachedObject> memoryCacheObjectsAge = new TreeMap<Long, MemoryCachedObject>();
+    protected TreeMap<Long, CachedObjectInterface> cacheObjectsAge = new TreeMap<Long, CachedObjectInterface>();
+
+
+
     //использую HashMap в качестве хранилища количества обращений к объекту.
     //еще необходимо учитывать время добавления объекта в кэш чтобы вытеснять только старые объекты
     //проблема: если в кэше все элементы более 1 раза запрашивались - тогда новый элемент не сумеет их вытеснить
     //надо закладывать срок хранения - при превышении 1 минуты объект считается ненужным и может быть вытеснен
     //проблема: как быстро перебрать массив и определить наиболее старые элементы - циклом медленно
 
-    public MyObject getObject(Long ObjectID){
+    public ObjectCache(String cacheName){
+        this.cacheName = cacheName;
+    }
 
-        if (memoryCacheObjects.containsKey(ObjectID)) {
-            MemoryCachedObject cachedObject = (MemoryCachedObject) memoryCacheObjects.get(ObjectID);
-            return cachedObject.getObject();
+
+    public CachedObjectInterface getCachedObject(Long ObjectID){
+
+        if (cacheObjects.containsKey(ObjectID)) {
+            CachedObjectInterface cachedObject = (CachedObjectInterface) cacheObjects.get(ObjectID);
+            return cachedObject;
         }
 
         return null;
     }
 
-    public MemoryCachedObject addObject(MyObject myObject){
+    public CachedObjectInterface addCachedObject(CachedObjectInterface cachedObject){
 
-        System.out.println("попытка добавления объекта в кэш 1 уровня");
+        System.out.println("попытка добавления объекта в "+cacheName);
         //просто добавление в кэш если он меньше размера
-        if (memoryCacheObjects.size()< memoryCacheMaxSize) {
+        if (cacheObjects.size()< cacheMaxSize) {
 
-            putObjectIntoCache(myObject);
+            putObjectIntoCache(cachedObject);
             return null;
         }
 
@@ -46,35 +58,34 @@ public class MemoryCache {
         //ПРЕДВАРИТЕЛЬНО предполагаю что keySet отсортирован - необходимо уточнение
         ///собираю список устаревших объектов
         //среди них вытесняю либо самый старый либо с наименьшим числом обращений --вариант стратегии?
-        MemoryCachedObject oldObject = getOldestCachedObject();
+        CachedObjectInterface oldObject = getOldestCachedObject();
         if (oldObject != null) {
-            System.out.println("Вытеснен объект из кэш 1 уровня");
-            memoryCacheObjects.remove(oldObject.getObjectID());
-            memoryCacheObjectsAge.remove(oldObject.getCacheTimestamp());
+            System.out.println("Вытеснен объект из "+cacheName);
+            cacheObjects.remove(oldObject.getObjectID());
+            cacheObjectsAge.remove(oldObject.getCacheTimestamp());
 
-            putObjectIntoCache(myObject);
+            putObjectIntoCache(cachedObject);
 
             return oldObject;
         }
 
 
         return null;
-        }
-
-    private MemoryCachedObject getOldestCachedObject() {
-        MemoryCachedObject oldObject=null;
-        TreeMap<Long, MemoryCachedObject> oldObjects = new TreeMap<Long,MemoryCachedObject>();
+    }
+    private CachedObjectInterface getOldestCachedObject() {
+        CachedObjectInterface oldObject=null;
+        TreeMap<Long, CachedObjectInterface> oldObjects = new TreeMap<Long,CachedObjectInterface>();
         Calendar maxAge = Calendar.getInstance();
         maxAge.add(Calendar.SECOND, -1);
         long maxAgeTimestamp = maxAge.getTimeInMillis();
-        for (Long timestampKey : memoryCacheObjectsAge.keySet()){
+        for (Long timestampKey : cacheObjectsAge.keySet()){
 
             if (timestampKey<maxAgeTimestamp){
                 if (1==1) {
-                    oldObjects.put(memoryCacheObjectsAge.get(timestampKey).getCacheTimestamp(), memoryCacheObjectsAge.get(timestampKey));//чем больше число тем младше - тем меньше вероятность вылета
+                    oldObjects.put(cacheObjectsAge.get(timestampKey).getCacheTimestamp(), cacheObjectsAge.get(timestampKey));//чем больше число тем младше - тем меньше вероятность вылета
                 }
                 else
-                    oldObjects.put(memoryCacheObjectsAge.get(timestampKey).getUseCounter(), memoryCacheObjectsAge.get(timestampKey));//чем больше число чаще используется - тем меньше вероятность вылета
+                    oldObjects.put(cacheObjectsAge.get(timestampKey).getUseCounter(), cacheObjectsAge.get(timestampKey));//чем больше число чаще используется - тем меньше вероятность вылета
             }
         }
         if (oldObjects.size()>0) {
@@ -84,12 +95,13 @@ public class MemoryCache {
         return oldObject;
     }
 
+    protected void putObjectIntoCache(CachedObjectInterface cachedObject){
 
-    private void putObjectIntoCache(MyObject myObject) {
-        MemoryCachedObject cachedObject = new MemoryCachedObject(myObject);
 
-        memoryCacheObjectsAge.put(cachedObject.getCacheTimestamp(), cachedObject);
-        memoryCacheObjects.put(myObject.getID(), cachedObject);
-        System.out.println("добавлен объект в кэш 1 уровня");
+        cacheObjectsAge.put(cachedObject.getCacheTimestamp(), cachedObject);
+        cacheObjects.put(cachedObject.getObjectID(), cachedObject);
+        System.out.println("добавлен объект в "+cacheName);
     }
+
+
 }
