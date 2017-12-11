@@ -3,6 +3,8 @@ package org.twolevelcache;
 
 /* старт: 07.12.2017 15:20 .. 17:30 сделан каркас, основные файлы, примерно продуман алгоритм
    продолжение: 08.12.2017 14:00 .. 16:30  - сделан рефакторинг в сторону интерфейсов и наследования. получилась стройная модель. запускается, но почему то не выводит в файлы
+   продолжение: 11.12 10:20
+
 
 *
 * задание: создать двухуровневый кэш для объектов с возможностью настройки стратегии хранениея/вытеснения и размеров кэша
@@ -18,10 +20,21 @@ package org.twolevelcache;
 * Объединенный кэш TwoLevelCache
 *
 *
+*
+* вопросы:
+* как работает файловый кэш с случае холодного запуска... логично что закачивает объекты в мемориКэш. при этом удаляя из файлового кэш?
+* но тогда в случае выключения программы из файлового кэш удалится часто используемый объект
+* значит принимаю: объекты которые есть в мемориКэш могут оставаться в файловом кэш...
+* но при этом теряются счетчики и время создания/обращения
+*
+*
+*
+*
 * */
 
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -41,18 +54,29 @@ public class Main {
         //при повторных холодных запусках будет срабатывать файловый кэш
         //при повторных горячих запусках будет срабатывать кэш в памяти
 
-        //кэш 1 уровня дает задержку 5 мс
-        //кэш 2 уровня дает задержку 10 мс
+        //кэш 1 уровня дает задержку 0 мс
+        //кэш 2 уровня дает задержку 5 мс
         //объект без кэша дает задержку 50 мс
 
+        Calendar start = Calendar.getInstance();
 
         ObjectProvider objectProvider = new ObjectProvider();
-        for (long i=0; i< 10; i++) {
+/*
+        MyObject object0 = objectProvider.getObject((long)0);
+        MyObject object1 = objectProvider.getObject((long)1);
+        MyObject object00 = objectProvider.getObject((long)0);
+*/
+
+
+        for (long i=0; i< 1000; i++) {
             Long objectID = (long)(1000*Math.random());
             MyObject object = objectProvider.getObject(objectID);
         }
 
 
+        Calendar end = Calendar.getInstance();
+
+        System.out.println(String.format("Execute time: %d %s",end.getTimeInMillis() - start.getTimeInMillis()," ms"));
 
 
 

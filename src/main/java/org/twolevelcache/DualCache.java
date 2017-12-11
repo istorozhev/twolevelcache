@@ -2,37 +2,56 @@ package org.twolevelcache;
 
 public class DualCache {
 
-    ObjectCache memoryCache = new ObjectCache("memoryCache");
-    ObjectCache filesystemCache = new ObjectCache("filesystemCache");
+    ObjectCache memoryCache = new ObjectCache("memoryCache", new MemoryObjectStorage());
+    ObjectCache filesystemCache = new ObjectCache("filesystemCache", new FilesystemObjectStorage());
 
-    public MyObject getObject(Long ObjectID){
-        CachedObjectInterface cachedObject = memoryCache.getCachedObject(ObjectID);
 
-        if (cachedObject == null) {
+
+
+    DualCache(){
+        memoryCache.cacheMaxSize = 100;
+        filesystemCache.cacheMaxSize = 500;
+
+    }
+
+    public MyObject getObject(Long objectID){
+
+
+        MyObject myObject = memoryCache.getObject(objectID);
+
+        if (myObject == null) {
             System.out.println("Объекта нет в кэш "+memoryCache.getCacheName() + ". поиск в кэш "+filesystemCache.getCacheName());
-            cachedObject = filesystemCache.getCachedObject(ObjectID);
+            myObject = filesystemCache.getObject(objectID);
 
-            //TO DO не забыть - необходимо проверить - может объект из кэш 2 уровня надо поместить в кэш 1 уровня т.к. он чаще используется
+
+            //при извлечении объекта из ФС кэш - сдублировать его в мемори-кэш
+            ///после этого - счетчик обращений к файловому объекту остановится
+            //при этом при добавлении в меморикэш - возможно вытеснение объекта
+            if (myObject!=null)
+                addObject(myObject);
+
         }
 
-        if (cachedObject == null)
+        if (myObject == null)
             return  null;
 
-        return cachedObject.getObject();
+        return myObject;
     }
 
     public void addObject(MyObject object){
-        //тут разработатка основная
 
+        System.out.println(String.format("DualCache.addObject %d ", object.getID()));
         try {
-            CachedObjectInterface cachedObject = new MemoryCachedObject(object);
-            CachedObjectInterface oldObject = memoryCache.addCachedObject(cachedObject);
+
+            MyObject oldObject = memoryCache.addObject(object);
             if (oldObject!=null){
-                FilesystemCachedObject filesystemCachedObject = new FilesystemCachedObject(oldObject);
-                filesystemCache.addCachedObject(oldObject);
+                MyObject oldFSObject = filesystemCache.addObject(oldObject);
+
+                //при вытеснении - автоматически удаляется их хранилища
+
             }
         } catch (Exception e) {
-            Main.LOGGER.severe(e.getMessage());
+            Main.LOGGER.severe(e.toString());
         }
 
 

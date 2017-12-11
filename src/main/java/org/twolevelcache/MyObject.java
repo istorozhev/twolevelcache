@@ -3,7 +3,9 @@ package org.twolevelcache;
 import lombok.Getter;
 import lombok.Setter;
 
-public class MyObject {
+import java.io.Serializable;
+
+public class MyObject implements Serializable {
 
 
     @Getter

@@ -1,15 +1,22 @@
 package org.twolevelcache;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Calendar;
 
-public abstract class CachedObject implements CachedObjectInterface{
+public class CachedObject {
 
-    protected MyObject object = null;
+    //protected MyObject object = null;
 
 
     private Long cacheTimestamp =  null;
     protected Long objectID =  null;
     protected Long useCounter = null;
+
+
+
+
 
 
 
@@ -21,26 +28,12 @@ public abstract class CachedObject implements CachedObjectInterface{
         if (myObject.getID() == null)
             throw new Exception("save NULL object ID");
 
-        object = myObject;
+
         objectID = myObject.getID();
         useCounter = Long.valueOf(0);
         cacheTimestamp = Calendar.getInstance().getTimeInMillis();
     }
 
-    public CachedObject (CachedObjectInterface cachedObject) throws Exception{
-        if (cachedObject == null)
-            throw new Exception("save NULL object");
-        if (cachedObject.getObject() == null)
-            throw new Exception("save NULL object");
-        if (cachedObject.getObjectID() == null)
-            throw new Exception("save NULL object ID");
-
-        object = cachedObject.getObject();
-        objectID = cachedObject.getObjectID();
-        useCounter = cachedObject.getUseCounter();
-        cacheTimestamp = cachedObject.getCacheTimestamp();
-
-    }
 
 
 
@@ -49,8 +42,10 @@ public abstract class CachedObject implements CachedObjectInterface{
     }
 
     public Long getObjectID(){
-        return  object.getID();
+        return  objectID;
     }
+
+
 
     public Long getUseCounter() {
         return useCounter;

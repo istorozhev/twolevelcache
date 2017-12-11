@@ -1,6 +1,8 @@
 package org.twolevelcache;
 
 public interface ObjectCacheInterface {
-    public CachedObjectInterface addCachedObject(CachedObjectInterface cachedObject);
-    public CachedObjectInterface getCachedObject(Long ObjectID);
+    public MyObject addObject(MyObject myObject) throws Exception;
+    public MyObject getObject(Long objectID);
+    public void removeObject(Long objectID);
+
 }
