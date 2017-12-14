@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="twolevelcache:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/twolevelcache_jar</output-path>
+    <root id="archive" name="twolevelcache.jar">
+      <element id="module-output" name="twolevelcache" />
+      <element id="extracted-dir" path="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.16.10/lombok-1.16.10.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>
