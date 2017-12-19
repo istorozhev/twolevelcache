@@ -27,25 +27,48 @@ package org.twolevelcache;
 * значит принимаю: объекты которые есть в мемориКэш могут оставаться в файловом кэш...
 * но при этом теряются счетчики и время создания/обращения
 *
+
 *
 *
 *
 * */
 
 
+
+import org.twolevelcache.cache.DualCache;
+
 import java.io.IOException;
 import java.util.Calendar;
+import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 public class Main {
 
-    public static final Logger LOGGER = Logger.getLogger(Main.class.getName());
+    public static final Logger LOGGER = Logger.getLogger("logger");
+
+
 
 
     public static void main(String []  args){
 
-        System.out.println("started");
+        try {
+            LogManager.getLogManager().readConfiguration(Main.class.getResourceAsStream("/logging.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        LOGGER.setLevel(Level.INFO);
+
+        if (args.length>0){
+            if (args[0].contentEquals("DEBUG"))
+                LOGGER.setLevel(Level.FINEST);
+        }
+
+        //LOGGER.setLevel(Level.SEVERE);
+
+
+
 
         //тестирование: из хранилища в случайном порядке заправшиваются объекты по коду от 1 до 1000.
         //размер кэш: 1 уровень 50  элементов
@@ -58,25 +81,48 @@ public class Main {
         //кэш 2 уровня дает задержку 5 мс
         //объект без кэша дает задержку 50 мс
 
-        Calendar start = Calendar.getInstance();
 
-        ObjectProvider objectProvider = new ObjectProvider();
-/*
-        MyObject object0 = objectProvider.getObject((long)0);
-        MyObject object1 = objectProvider.getObject((long)1);
-        MyObject object00 = objectProvider.getObject((long)0);
-*/
+        Calendar totalStart = Calendar.getInstance();
+
+        DualCache cache = new DualCache();
+
+        ObjectProvider objectProvider = new ObjectProvider(cache);
+        cache.printCacheStatistics();
+
+        for(int n=0; n< 10; n++) {
+
+            Calendar start = Calendar.getInstance();
+
+            for (long i = 0; i < 100; i++) {
+                Long objectID = (long) (100 * Math.random());
+                MyObject object = objectProvider.getObject(objectID);
+            }
+
+            Calendar end = Calendar.getInstance();
+            Main.LOGGER.info(String.format("cycle execute time: %d %s",end.getTimeInMillis() - start.getTimeInMillis()," ms"));
+            objectProvider.printStatistics();
+            objectProvider.clearStatistics();
+            cache.printCacheStatistics();
+            cache.cleanCacheStatistics();
 
 
-        for (long i=0; i< 1000; i++) {
-            Long objectID = (long)(1000*Math.random());
-            MyObject object = objectProvider.getObject(objectID);
+
+
         }
 
+        objectProvider.printStatistics();
 
-        Calendar end = Calendar.getInstance();
 
-        System.out.println(String.format("Execute time: %d %s",end.getTimeInMillis() - start.getTimeInMillis()," ms"));
+        cache.onCloseProgram();
+
+
+
+
+        Calendar totalEnd = Calendar.getInstance();
+        Main.LOGGER.info(String.format("Execute time: %d %s",totalEnd.getTimeInMillis() - totalStart.getTimeInMillis()," ms"));
+
+
+
 
 
 

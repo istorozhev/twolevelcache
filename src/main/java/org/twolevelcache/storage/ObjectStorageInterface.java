@@ -1,6 +1,7 @@
-package org.twolevelcache;
+package org.twolevelcache.storage;
 
 
+import org.twolevelcache.MyObject;
 
 public interface ObjectStorageInterface {
 

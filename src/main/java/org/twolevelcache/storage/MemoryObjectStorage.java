@@ -1,4 +1,7 @@
-package org.twolevelcache;
+package org.twolevelcache.storage;
+
+import org.twolevelcache.Main;
+import org.twolevelcache.MyObject;
 
 import java.util.HashMap;
 

@@ -1,4 +1,7 @@
-package org.twolevelcache;
+package org.twolevelcache.storage;
+
+import org.twolevelcache.Main;
+import org.twolevelcache.MyObject;
 
 import java.io.*;
 
@@ -61,12 +64,6 @@ public class FilesystemObjectStorage implements ObjectStorageInterface{
             }
 
 
-
-            try {
-                Thread.sleep(5);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
 
 
 
